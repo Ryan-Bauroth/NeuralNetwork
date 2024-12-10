@@ -15,7 +15,7 @@ class Layer:
         self.nodes_in = nodes_in
         self.nodes_out = nodes_out
         # Corrected initialization of arrays
-        self.weights = np.zeros((nodes_in, nodes_out))
+        self.weights = self.xavier_init((nodes_in, nodes_out))
         self.cost_gradient_w = np.zeros((nodes_in, nodes_out))
         self.biases = np.zeros(nodes_out)
         self.cost_gradient_b = np.zeros(nodes_out)
@@ -42,12 +42,18 @@ class Layer:
         return activations
 
     def activation_function(self, weighted_input):
+        # Relu function
+        # return max(0, weighted_input)
         # Sigmoid function
         return 1 / (1 + np.exp(-weighted_input))
 
     def node_cost(self, output_activation, expected_activation):
         error = output_activation - expected_activation
         return error * error
+
+    def xavier_init(self, shape):
+        limit = np.sqrt(6 / (shape[0] + shape[1]))
+        return np.random.uniform(-limit, limit, size=shape)
 
 
 class NeuralNetwork:
@@ -70,7 +76,7 @@ class NeuralNetwork:
         for i in range(0, len(shuffled_training_data), self.batch_size):
             training_data = shuffled_training_data[i:i + self.batch_size]
 
-            if len(training_data) < self.batch_size:
+            if len(training_data) == 0:
                 break
 
             for layer in self.layers:
@@ -116,32 +122,120 @@ class NeuralNetwork:
         return total_cost / len(training_data)
 
 
-class RunNN:
+class NNTrainer:
     def __init__(self, nn, training_data):
         self.nn = nn
         self.training_data = training_data
 
-    def plot_gradient_graph(self, random_point_num=500):
-        cmap = plt.get_cmap('viridis')
-        plt.figure(figsize=(10, 6))
-
+    def train_nn_from_function(self, to_completion=True, random_point_num=500, iterations=1000, update_iters=500):
         sample_inputs = np.random.rand(random_point_num, 2)
-        real_inputs = np.array([data_point.inputs for data_point in training_data])
-        real_outputs = np.array([data_point.expected_outputs[0] for data_point in training_data])
 
-        sample_colors = [self.nn.calculate_outputs(x)[0] for x in sample_inputs]
-        colors = [self.nn.calculate_outputs(x)[0] for x in real_inputs]
+        sample_expected_result = [self.gradient_equation(x) for x in sample_inputs]
 
-        plt.scatter(sample_inputs[:, 0], sample_inputs[:, 1], c=sample_colors, cmap=cmap, s=50)
-        plt.scatter(real_inputs[:, 0], real_inputs[:, 1], c=real_outputs, cmap=cmap, s=100)
+        sample_training_data = [DataPoint(sample_inputs[i], [sample_expected_result[i], abs(1 - sample_expected_result[i])]) for i in range(len(sample_inputs))]
 
-        # Plot data
-        plt.colorbar()
-        plt.title('Data Plot')
-        plt.xlabel('X Axis')
-        plt.ylabel('Y Axis')
+        self.training_data = sample_training_data
+
+        if to_completion:
+
+            done_training = False
+
+            iters = 0
+
+            costs = []
+
+            while not done_training:
+                training_costs = self.train_model(update_iters, cost_return=True)
+                iters += update_iters
+                costs.extend(training_costs)
+                rounded_sample_result = [1 if self.nn.calculate_outputs(x)[0] > .5 else 0 for x in sample_inputs]
+                done_training = self.test_model(sample_inputs, sample_expected_result, rounded_sample_result, costs)
+
+            print(iters)
+        else:
+            self.train_model(iterations)
+
+
+    def test_model(self, sample_inputs, expected_result, result, costs):
+
+        # plots a cost line chart, showing how cost decreases over iterations
+        self.plot_line([np.arange(len(costs)), costs], title="NN Cost Line Plot", x="Iterations", y="Cost")
+
+        # array of the actual nn predictions
+        colormap_colors = [self.nn.calculate_outputs(x)[0] for x in sample_inputs]
+        # array of colors highlighting if each point is correctly marked
+        rg_colors = ["green" if expected_result[i] == result[i] else "red" for i in range(len(expected_result))]
+        # condition checking whether all points are correctly identified
+        all_green = np.all(rg_colors == 'green')
+
+        # color map and simplified inputs array
+        cmap = plt.get_cmap('viridis')
+        scatter_inputs = [sample_inputs[:, 0], sample_inputs[:, 1]]
+
+        # plots all 3 scatter plots using different inputs and information
+        # actual nn predictions scatter plot
+        self.plot_scatter(scatter_inputs, colormap_colors, title="Actual Output Scatter Plot", color_map=cmap, figure_size=(13, 10))
+        # rounds true/false values from nn predictions and displays them
+        self.plot_scatter(scatter_inputs, result, title="Rounded Output Scatter Plot")
+        # displays which points are correctly identified
+        self.plot_scatter(scatter_inputs, rg_colors, title="Red/Green Scatter Plot")
+        
+        return all_green
+
+    def plot_scatter(self, scatter_inputs, c, title="Scatter Plot", figure_size=(10, 10), s=50, x="X", y="Y", color_map=None):
+        # sets size of figure
+        plt.figure(figsize=figure_size)
+        
+        # scatters input points with color and size
+        plt.scatter(scatter_inputs[0], scatter_inputs[1], c=c, s=s)
+        
+        # if color map is included, shows a color bar and adds the color map
+        if color_map is not None:
+            plt.scatter(scatter_inputs[0], scatter_inputs[1], vmin=0, vmax=1, c=c, cmap=color_map, s=s)
+            plt.colorbar()
+        # if not, plots normal color input
+        else:
+            plt.scatter(scatter_inputs[0], scatter_inputs[1], c=c, s=s)
+            
+        # sets title and axis labels
+        plt.title(title)
+        plt.xlabel(x)
+        plt.ylabel(y)
+        
+        # adds grid and shows graph
         plt.grid(True)
         plt.show()
+        
+    def plot_line(self, inputs, title="Line Plot", figure_size=(10, 6), x="X", y="Y", color='b', linestyle='-', linewidth=2):
+        # sets size of figure
+        plt.figure(figsize=figure_size)
+        
+        # plots line with two input arrays, a color, a linestyle, and a line width
+        plt.plot(inputs[0], inputs[1], color=color, linestyle=linestyle, linewidth=linewidth)
+        
+        # sets title and axis titles
+        plt.title(title)
+        plt.xlabel(x)
+        plt.ylabel(y)
+        
+        # adds grid and shows graph
+        plt.grid(True)
+        plt.show()
+
+    def train_model(self, iterations, cost_return=False):
+        # Adjust learning iterations
+        costs = []
+        for _ in tqdm(range(iterations)):
+            self.nn.learn(self.training_data)
+            if cost_return:
+                costs.append(self.nn.cost(self.training_data))
+        return costs
+
+
+
+    def gradient_equation(self, coords):
+        x, y = coords
+        return 1 if x + (y - .2) * (y - .2) > .5 else 0
 
 
 # Load the data
@@ -157,13 +251,8 @@ training_data = [DataPoint(inputs[i], expected_outputs[i]) for i in range(len(in
 
 # Initialize network, learn
 h = .0001
-learn_rate = 0.01
-nn = NeuralNetwork([2, 3, 2], 8, learn_rate=learn_rate, h=h)  # 2 inputs, 3 hidden nodes, 2 outputs
+learn_rate = 0.04
+nn = NeuralNetwork([2, 3, 2], 64, learn_rate=learn_rate, h=h)  # 2 inputs, 3 hidden nodes, 2 outputs
 
-# Adjust learning iterations
-iterations = 100000
-for _ in tqdm(range(iterations)):
-    nn.learn(training_data)
-
-main = RunNN(nn, training_data)
-main.plot_gradient_graph()
+trainer = NNTrainer(nn, training_data)
+trainer.train_nn_from_function(to_completion=True, random_point_num=500, update_iters=500)
