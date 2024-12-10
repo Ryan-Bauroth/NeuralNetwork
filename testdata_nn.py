@@ -44,8 +44,10 @@ class Layer:
     def activation_function(self, weighted_input):
         # Relu function
         # return max(0, weighted_input)
+        # tanh function
+        return (math.exp(weighted_input) - math.exp(-weighted_input)) / (math.exp(weighted_input) + math.exp(-weighted_input))
         # Sigmoid function
-        return 1 / (1 + np.exp(-weighted_input))
+        # return 1 / (1 + np.exp(-weighted_input))
 
     def node_cost(self, output_activation, expected_activation):
         error = output_activation - expected_activation
@@ -235,7 +237,8 @@ class NNTrainer:
 
     def gradient_equation(self, coords):
         x, y = coords
-        return 1 if x + (y - .2) * (y - .2) > .5 else 0
+        return 1 if math.sin(x * 6) > y else 0
+        #return 1 if x + (y - .2) * (y - .2) > .5 else 0
 
 
 # Load the data
@@ -252,7 +255,7 @@ training_data = [DataPoint(inputs[i], expected_outputs[i]) for i in range(len(in
 # Initialize network, learn
 h = .0001
 learn_rate = 0.04
-nn = NeuralNetwork([2, 3, 2], 64, learn_rate=learn_rate, h=h)  # 2 inputs, 3 hidden nodes, 2 outputs
+nn = NeuralNetwork([2, 5, 2], 64, learn_rate=learn_rate, h=h)  # 2 inputs, 3 hidden nodes, 2 outputs
 
 trainer = NNTrainer(nn, training_data)
 trainer.train_nn_from_function(to_completion=True, random_point_num=500, update_iters=500)
