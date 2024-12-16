@@ -2,3 +2,5 @@
 saved_img
 *.csv
 *.tsv
+*.json
+data
