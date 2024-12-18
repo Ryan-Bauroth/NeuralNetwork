@@ -7,6 +7,7 @@
 So far, I have used this neural network to successfully complete two tasks:
 
 A) train on and find a **defined function** (for example, y < sin(6x))
+
 B) train on a dataset of **MNIST handwritten digits** and detect handwritten digits through a pygame interface
 
 ## Installation & Use
