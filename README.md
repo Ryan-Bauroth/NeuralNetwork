@@ -51,11 +51,11 @@ Example handwritten digits after image modification algorithm:
 
 _Five handwritten digits resized, rotated, and with salt and pepper noise applied_
 
-The mnist_test file displays an accuracy rating of the NN in the terminal for both training and test data. It also displays 10 example images of where the NN made mistakes to help debug. Currently, the NN is at an accuracy of 93.05%.
+The mnist_test file displays an accuracy rating of the model in the terminal for both training and test data. It also displays 10 example images of where the model made mistakes to help debug. Currently, my model has an accuracy of 93.05%.
 
 <img width="997" alt="Screenshot 2024-12-17 at 8 24 42 PM" src="https://github.com/user-attachments/assets/b1ea0707-91ed-4a09-a634-356cf206dcee" />
 
-_Ten mistakenly classified digits, labeled the NN identifications_
+_Ten mistakenly classified digits, labeled the model identifications_
 
 
 Finally, the mnist_drawing_test file opens a pygame window to allow users to draw their own digits. These are identified by the NN in real time and a % ranking is displayed on the side for each possible classification.
