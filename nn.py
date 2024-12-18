@@ -3,7 +3,6 @@ import json
 import matplotlib.pyplot as plt
 from tqdm import tqdm
 import numpy as np
-import pandas as pd
 import math
 
 class DataPoint:
