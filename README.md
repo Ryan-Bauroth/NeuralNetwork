@@ -70,6 +70,6 @@ While this outlet is not perfect, as it does not accurately represent the traini
 
 Here are some of the resources I used while creating this project
 
-- This project is based upon this video by Sebastian Lague [https://www.youtube.com/watch?v=hfMk-kjRv4c&t=2846s]
+- This project is based upon [this video by Sebastian Lague](https://www.youtube.com/watch?v=hfMk-kjRv4c&t=2846s)
 - I used ChatGPT and JebrainsAI in a limited fashion on this project
 
