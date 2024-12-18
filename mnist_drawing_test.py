@@ -47,7 +47,7 @@ def update_predictions(classification_array):
         text_color = WHITE
         if i == predicted:
             text_color = YELLOW
-        text = font.render(f"{i} : {max(0, classification_array[i] / total):6.2f}%", True, text_color)
+        text = font.render(f"{i} : {max(0, classification_array[i] / total):6.2f}", True, text_color)
         screen.blit(text, (WINDOW_SIZE + SIDE_BUFFER + 10, TOP_BUFFER + i * 30))
 
 def main():

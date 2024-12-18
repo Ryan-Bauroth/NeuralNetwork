@@ -48,6 +48,9 @@ training_data = []
 for i in range(len(refactored_train_imgs)):
     training_data.append(DataPoint(refactored_train_imgs[i], train_labels_one_hot[i]))
 
+for i in range(len(refactored_test_imgs)):
+    training_data.append(DataPoint(refactored_test_imgs[i], test_labels_one_hot[i]))
+
 failed_images = []
 
 for data_point in training_data:
