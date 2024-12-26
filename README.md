@@ -1,5 +1,4 @@
-# Ghost in the Machine
-
+# Neural Network
 ## Description
 
 [Let's talk about AI](https://open.spotify.com/track/4h5x3XHLVYFJaItKuO2rhy?si=2ddf9a4aaf864a36). Rather, let's talk about this project, which is a **neural network** built from scratch (no tensorflow, no pytorch, nothing). 
